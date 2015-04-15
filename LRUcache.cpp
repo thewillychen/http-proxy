@@ -18,7 +18,7 @@ string LRUcache::get(string key){
 	return NULL;
 }
 
-int set(string key, string data){
+int LRUcache::set(string key, string data){
 	if(data.count(key)){ //existing element
 		Node node = data.at(key);
 		moveToFirst(node);
@@ -35,9 +35,7 @@ int set(string key, string data){
 	}
 
 	//New entry
-	Node node = new Node;
-	node.data = data;
-	node.key = key; 
+	Node node = Node(data,key);
 	queue.push_front(node);
 	data.insert(std::pair<string, string>(key, node));
 	return 1;

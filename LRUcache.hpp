@@ -7,6 +7,10 @@ class Node{
 public:
 	string data; //data = response - http header
 	string key; //key = url
+	Node::Node(string data, string key){
+		data = data;
+		key = key;
+	}
 };
 
 class LRUcache{
