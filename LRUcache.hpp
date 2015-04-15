@@ -13,6 +13,7 @@ public:
 
 class LRUcache{
 	int capacity;
+	int usedMemory;
 	map<int, Node> data;
 	list<Node> queue;
 	//Node head;
@@ -24,8 +25,8 @@ public:
 	int set(string key, string data);
 
 private:
-	void add(Node node); //Append node as head
-	void remove(Node node);
+	//void add(Node node); //Append node as head
+	//void remove(Node node);
 	void moveToFirst(Node node);
-	void removeLast();
+	//void removeLast();
 };

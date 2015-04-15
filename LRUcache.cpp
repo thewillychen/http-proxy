@@ -6,34 +6,57 @@ using namespace std;
 
 LRUcache::LRUcache(int size){
 	capacity = size;
+	usedMemory = 0;
 }
 
 string LRUcache::get(string key){
 	if(data.count(key)){
-
+		Node node = data.at(key);
+		moveToFirst(node);
+		return node.data;
 	}
+	return NULL;
 }
 
 int set(string key, string data){
-	if(data.count(key)){
-
-	}
-}
-
-void LRUcache::add(Node node){
-	node->next = NULL;
-	node->previous = NULL;
-
-	if(head == NULL){
-		head = node;
-		end = node;
-		return;
+	if(data.count(key)){ //existing element
+		Node node = data.at(key);
+		moveToFirst(node);
+		node.data = data;
+		return 1;
 	}
 
-	head->previous = node;
-	node->next = head;
-	head = node;
+	if(data.length()< capacity){ //Out of capacity, clear oldest spots until enough space
+		while(usedMemory + data.length()>capacity){
+			string oldKey = queue.back().key;
+			queue.pop_back();
+			data.erase(oldKey);
+		}
+	}
+
+	//New entry
+	Node node = new Node;
+	node.data = data;
+	node.key = key; 
+	queue.push_front(node);
+	data.insert(std::pair<string, string>(key, node));
+	return 1;
 }
+
+// void LRUcache::add(Node node){
+// 	node->next = NULL;
+// 	node->previous = NULL;
+
+// 	if(head == NULL){
+// 		head = node;
+// 		end = node;
+// 		return;
+// 	}
+
+// 	head->previous = node;
+// 	node->next = head;
+// 	head = node;
+// }
 
 // void LRUcache::remove(Node node){
 // 	if(node == NULL || head == NULL)
