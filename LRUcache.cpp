@@ -2,6 +2,9 @@
 #include <map>
 #include <list>
 #include <string>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
 using namespace std;
 
 LRUcache::LRUcache(int size){

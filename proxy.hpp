@@ -1,5 +1,9 @@
 #include <thread>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
 #include "LRUcache.hpp"
+
 using namespace std;
 class Proxy{
 	string port;
@@ -9,5 +13,7 @@ class Proxy{
 	public:
 		Proxy(string port, string cacheSize);
 		int run();
-
+		int listen();
+		int respond(char * msg);
+		string parseHTTP(char * msg);
 }
