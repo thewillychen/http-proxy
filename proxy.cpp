@@ -4,11 +4,12 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
+#include "proxy.hpp"
 using namespace std;
 
-Proxy::Proxy(string port, string cacheSize){
-	port = port;
-	cacheSize = cacheSize;
+Proxy::Proxy(string pport, string cacheSizeMB){
+	port = pport;
+	cacheSize = std::stoi(cacheSizeMB,10);
 	cache = LRUcache(cacheSize);
 }
 
@@ -44,7 +45,7 @@ int Proxy::respond(char * msg){
 }
 
 string Proxy::parseHTTP(char * msg){
-	
+
 }
 
 int Proxy::run(){

@@ -7,6 +7,9 @@
 #include <netdb.h>
 using namespace std;
 
+LRUcache::LRUcache(){
+}
+
 LRUcache::LRUcache(int size){
 	capacity = size;
 	usedMemory = 0;
