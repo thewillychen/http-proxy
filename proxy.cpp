@@ -28,35 +28,30 @@ sockaddr_in sAdr(string str){
 int Proxy::listenForBrowser(){
 	//Do something to listen to the port and receive the http requests from the browser
 	char buf[8190];
-	struct sockaddr_in sin;
+	struct sockaddr_in sin=sAdr(port);
 	int serv_sock, new_sock;
-	int len;
-
-	bzero((char *)&sin, sizeof(sin));
-	sin.sin_family = AF_INET;
-	sin.sin_addr.s_addr = htons(INADDR_ANY);
-	sin.sin_port = htons(port);
-
+	socklen_t len;
 	/*Passive listen setup*/
-	if((serv_sock = socket(PF_INET, SOCK_STREAM,0)) <0){
+	if((serv_sock = ::socket(PF_INET, SOCK_STREAM,0)) <0){
 		perror("Create socket error");
 		exit(1);
 	}
 
-	if((bind(serv_sock, (struct sockaddr *)&sin, sizeof(sin))) < 0){
+	if((::bind(serv_sock, (struct sockaddr *)&sin, sizeof(sin))) < 0){
 		perror("Bind error");
 		exit(1);
 	}
-	listen(serv_sock, MAX_PENDING);
-	printf("Server is listening");
+	::listen(serv_sock, 5);
 
 	/*Wait for connection loop*/
 	while(1){
-		if((new_sock = accept(serv_sock, (struct sockaddr *)&sin, &len))<0){
+
+		fprintf(stderr, "Server is listening\n");
+		if((new_sock = ::accept(serv_sock, (struct sockaddr *)&sin, &len))<0){
 			perror("Connection failed");
 			exit(1);
 		}
-		while(len = recv(new_sock,buf,sizeof(buf),0)){
+		while(len = ::recv(new_sock,buf,sizeof(buf),0)){
 			printf("receieved \n");
 		}
 	}
