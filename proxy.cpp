@@ -83,9 +83,59 @@ int Proxy::initBrowserListener(){
 int Proxy::processRequest(char * msg, int socket){
 	string request(msg);
 	string url = parseURL(request);
-	fprintf(stderr, "%s\n", url.c_str());
-	//Respond to the http request 
-	//check cahce
+	char reply[];
+
+	int sockfd;  
+	struct addrinfo hints, *servinfo, *p;
+	int rv;
+	int recv_len =0;
+
+	memset(&hints, 0, sizeof hints);
+	hints.ai_family = AF_UNSPEC; // use AF_INET6 to force IPv6
+	hints.ai_socktype = SOCK_STREAM;
+
+	if ((rv = getaddrinfo(url, "http", &hints, &servinfo)) != 0) {
+		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
+		exit(1);
+	}
+
+// loop through all the results and connect to the first we can
+	for(p = servinfo; p != NULL; p = p->ai_next) {
+		if ((sockfd = socket(p->ai_family, p->ai_socktype,
+			p->ai_protocol)) == -1) {
+			perror("socket");
+		continue;
+		}
+
+		if (connect(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
+			perror("connect");
+			continue;
+		}
+
+		if(send(socketfd,msg,MAX_MSG_LENGTH, 0)< 0){
+			perror("Send error:");
+			return l;
+		}
+		recv_len = read(socketfd,reply, MAX_MSG_LENGTH*10);
+		if (recv_len < 0) {
+			perror("Recv error:");
+			return 1;
+		}
+		fprintf(stderr, "Server response: %s\n", reply);
+
+	    break; // if we get here, we must have connected successfully
+	}
+
+	if (p == NULL) {
+	    // looped off the end of the list with no connection
+		fprintf(stderr, "failed to connect\n");
+		exit(2);
+	}
+
+	freeaddrinfo(servinfo); // all done with this structure
+		//fprintf(stderr, "%s\n", url.c_str());
+		//Respond to the http request 
+		//check cahce
 	return 1;
 }
 
