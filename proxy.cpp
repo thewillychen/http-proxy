@@ -5,13 +5,25 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include "proxy.hpp"
+#include <netinet/in.h>
+#include <arpa/inet.h>
 using namespace std;
 
-Proxy::Proxy(string pport, string cacheSizeMB){
+Proxy::Proxy(string pport, char * cacheSizeMB){
 	port = pport;
-	cacheSize = std::stoi(cacheSizeMB,10);
+	cacheSize = atoi(cacheSizeMB);
 	cache = LRUcache(cacheSize);
 }
+
+sockaddr_in sAdr(string str){
+  struct sockaddr_in addr;
+  int s=str.find(":");
+  addr.sin_addr.s_addr = inet_addr(str.substr(0,s).c_str());
+  addr.sin_family = AF_INET;
+  addr.sin_port = htons(atoi(str.substr(s+1).c_str()));
+  return addr;
+}
+
 
 int Proxy::listen(){
 	//Do something to listen to the port and receive the http requests from the browser
@@ -31,7 +43,7 @@ int Proxy::listen(){
 		int recvlen = recvfrom(sock, buf, 8190, 0, 0, 0);
 
 		if(recvlen>0){
-			std::thread (&Proxy::respond,buf).detach();
+
 			//newThread.detach();
 		}
 
@@ -42,10 +54,11 @@ int Proxy::listen(){
 int Proxy::respond(char * msg){
 	//Respond to the http request 
 	//check cahce
+	return 1;
 }
 
-string Proxy::parseHTTP(char * msg){
-
+char * Proxy::parseHTTP(char * msg){
+	return NULL;
 }
 
 int Proxy::run(){
@@ -60,15 +73,6 @@ int main(int argc, char ** argv){
 	Proxy p = Proxy(argv[1],argv[2]);
 	p.run();
 	return 0;
-}
-
-sockaddr_in sAdr(string str){
-  struct sockaddr_in addr;
-  int s=str.find(":");
-  addr.sin_addr.s_addr = inet_addr(str.substr(0,s).c_str());
-  addr.sin_family = AF_INET;
-  addr.sin_port = htons(atoi(str.substr(s+1).c_str()));
-  return addr;
 }
 
 

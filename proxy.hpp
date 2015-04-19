@@ -5,6 +5,8 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include "LRUcache.hpp"
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
 using namespace std;
 class Proxy{
@@ -13,10 +15,10 @@ class Proxy{
 	LRUcache cache; 
 
 	public:
-		Proxy(string pport, string cacheSizeMB);
+		Proxy(string pport, char * cacheSizeMB);
 		int run();
 		int listen();
 		int respond(char * msg);
-		string parseHTTP(char * msg);
+		char * parseHTTP(char * msg);
 };
 #endif /* PROXY_HPP */
