@@ -9,6 +9,7 @@
 #include <arpa/inet.h>
 #include <string.h>
 #include <regex>
+#include <sstream>
 
 using namespace std;
 
@@ -16,15 +17,6 @@ Proxy::Proxy(string pport, char * cacheSizeMB){
 	port = pport;
 	cacheSize = atoi(cacheSizeMB);
 	cache = LRUcache(cacheSize);
-}
-
-std::vector<std::string> & split(const std::string &s, char delim, std::vector<std::string> &elems) {
-    std::stringstream ss(s);
-    std::string item;
-    while (std::getline(ss, item, delim)) {
-        elems.push_back(item);
-    }
-    return elems;
 }
 
 int Proxy::listenForBrowser(){
@@ -60,7 +52,9 @@ int Proxy::listenForBrowser(){
 		}
 		fprintf(stderr, "new connection\n");
 		while(len = ::recv(new_sock,buf,sizeof(buf),0)){
-			fprintf(stderr, "receieved \n");
+			fprintf(stderr, "receieved:\n%s\n", buf);
+			string request(buf);
+			fprintf(stderr,"Url: %s",parseURL(request).c_str());
 		}
 	}
 
@@ -75,13 +69,26 @@ int Proxy::respond(char * msg){
 
 string Proxy::parseURL(string request){
 	std::vector<std::string> header; 
-	header = split(request, '\r\n', header);
-	string url = NULL;
+	string copyOfRequest = strdup(request.c_str());
+	string delimiter = "\r\n";
+	printf("Parsing url");
+	size_t pos = 0;
+	std::string token;
+	while ((pos = copyOfRequest.find(delimiter)) != std::string::npos) {
+	    token = copyOfRequest.substr(0, pos);
+	 	fprintf(stderr, "%s\n", token.c_str());
+	    header.push_back(token);
+	    copyOfRequest.erase(0, pos + delimiter.length());
+	}
+
+	header.push_back(copyOfRequest);
+
+	string url = string();
 	string host = "Host: ";
 	for(auto i : header){
 		size_t found = i.find(host);
 		if(found!=std::string::npos){
-			url = i.substring(host.length());
+			url = i.substr(host.length());
 		}
 	}
 	return url;

@@ -9,6 +9,7 @@
 #include <arpa/inet.h>
 #include <string.h>
 #include <regex>
+#include <sstream>
 
 using namespace std;
 class Proxy{
