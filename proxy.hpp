@@ -7,6 +7,7 @@
 #include "LRUcache.hpp"
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <string.h>
 
 using namespace std;
 class Proxy{
