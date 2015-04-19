@@ -28,34 +28,39 @@ sockaddr_in sAdr(string str){
 int Proxy::listenForBrowser(){
 	//Do something to listen to the port and receive the http requests from the browser
 	char buf[8190];
-	struct sockaddr_in my_addr=sAdr(port);
-	int sock, conn_sock;
+	struct sockaddr_in sin;
+	int serv_sock, new_sock;
 	int len;
-	if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-		perror("Create socket error:");
-		return -1;
+
+	bzero((char *)&sin, sizeof(sin));
+	sin.sin_family = AF_INET;
+	sin.sin_addr.s_addr = htons(INADDR_ANY);
+	sin.sin_port = htons(port);
+
+	/*Passive listen setup*/
+	if((serv_sock = socket(PF_INET, SOCK_STREAM,0)) <0){
+		perror("Create socket error");
+		exit(1);
 	}
 
-	if (::bind(sock, (struct sockaddr *)&my_addr, sizeof(my_addr)) < 0) { 
-		perror("bind failed"); 
-		return -1;
+	if((bind(serv_sock, (struct sockaddr *)&sin, sizeof(sin))) < 0){
+		perror("Bind error");
+		exit(1);
 	}
-	printf("made socket\n");
-	listen(sock,1);
+	listen(serv_sock, MAX_PENDING);
+	printf("Server is listening");
+
+	/*Wait for connection loop*/
 	while(1){
-		if((conn_sock = accept(sock, (struct sockaddr *)&my_addr, &len))<0){
+		if((new_sock = accept(serv_sock, (struct sockaddr *)&sin, &len))<0){
 			perror("Connection failed");
 			exit(1);
 		}
-		int recvlen = recvfrom(sock, buf, 8190, 0, 0, 0);
-
-		if(recvlen>0){
-			printf("Received request");
-
-			//newThread.detach();
+		while(len = recv(new_sock,buf,sizeof(buf),0)){
+			printf("receieved \n");
 		}
-
 	}
+
 	return 0;	
 }
 
