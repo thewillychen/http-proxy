@@ -39,10 +39,12 @@ int Proxy::listen(){
 		perror("bind failed"); 
 		return -1;
 	}
+	printf("made socket\n");
 	while(1){
 		int recvlen = recvfrom(sock, buf, 8190, 0, 0, 0);
 
 		if(recvlen>0){
+			printf("Received request");
 
 			//newThread.detach();
 		}
@@ -62,6 +64,7 @@ char * Proxy::parseHTTP(char * msg){
 }
 
 int Proxy::run(){
+	listen();
 	return 1;
 }
 
