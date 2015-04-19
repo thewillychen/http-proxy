@@ -9,7 +9,7 @@
 #include <arpa/inet.h>
 #include <string.h>
 #include <regex>
-#include <sstream>
+#include <pthread.h>
 
 using namespace std;
 
@@ -19,9 +19,15 @@ Proxy::Proxy(string pport, char * cacheSizeMB){
 	cache = LRUcache(cacheSize);
 }
 
-int Proxy::listenForBrowser(){
+void* callProcessRequest(void* object){
+	threadParams parameters = (threadParams*)object;
+	parameters.thisProxy->processRequest(parameters.requestMsg, parameters.socket);
+	return NULL;
+}
+
+int Proxy::initBrowserListener(){
 	//Do something to listen to the port and receive the http requests from the browser
-	char buf[8190];
+	char buf[MAX_MSG_LENGTH];
 	struct sockaddr_in sin;
 	int serv_sock, new_sock;
 	socklen_t len;
@@ -41,27 +47,41 @@ int Proxy::listenForBrowser(){
 		exit(1);
 	}
 	::listen(serv_sock, 5);
-
 	/*Wait for connection loop*/
 	while(1){
 		len = sizeof(sin);
 		fprintf(stderr, "Server is listening\n");
+		//new_sock = browser - proxy connection 
 		if((new_sock = ::accept(serv_sock, (struct sockaddr *)&sin, &len))<0){
 			perror("Connection failed");
 			exit(1);
 		}
+		//browserfd = new_sock;
+
 		fprintf(stderr, "new connection\n");
-		while(len = ::recv(new_sock,buf,sizeof(buf),0)){
+		if(len = ::recv(new_sock,buf,sizeof(buf),0)){ //while potentially for persistent?
 			fprintf(stderr, "receieved:\n%s\n", buf);
 			string request(buf);
 			fprintf(stderr,"Url: %s",parseURL(request).c_str());
+			//new_sock = browser 
+			threadParams params;
+			params.thisProxy = this;
+			params.socket = new_sock;
+			memset(params.requestMsg, 0, MAX_MSG_LENGTH);
+			memset(params.requestMsg, buf, MAX_MSG_LENGTH);
+
+			pthread_t httpRequestThread;
+			pthread_create(&httpRequestThread, NULL, &callProcessRequest,(void*)&params);
 		}
 	}
 
 	return 0;	
 }
 
-int Proxy::respond(char * msg){
+int Proxy::processRequest(char * msg, int socket){
+	string request(msg);
+	string url = parseURL(request);
+	fprintf(stderr, "%s\n", url.c_str());
 	//Respond to the http request 
 	//check cahce
 	return 1;
@@ -94,14 +114,6 @@ string Proxy::parseURL(string request){
 	return url;
 }
 
-char * Proxy::parseHTTP(char * msg){
-	return NULL;
-}
-
-int Proxy::run(){
-	listenForBrowser();
-	return 1;
-}
 
 int main(int argc, char ** argv){
 	if(argc != 3){
@@ -109,7 +121,7 @@ int main(int argc, char ** argv){
 		return 1;
 	}
 	Proxy p = Proxy(argv[1],argv[2]);
-	p.run();
+	p.initBrowserListener();
 	return 0;
 }
 

@@ -9,20 +9,28 @@
 #include <arpa/inet.h>
 #include <string.h>
 #include <regex>
-#include <sstream>
+#include <pthread.h>
+#define MAX_MSG_LENGTH 8190
 
 using namespace std;
+
+struct threadParams{
+	Proxy thisProxy;
+	char requestMsg[MAX_MSG_LENGTH];
+	int socket;
+};
+typedef struct threadParams threadParams;
+
 class Proxy{
 	string port;
+	//int browserfd;
 	int cacheSize;
 	LRUcache cache; 
 
 	public:
 		Proxy(string pport, char * cacheSizeMB);
-		int run();
-		int listenForBrowser();
-		int respond(char * msg);
-		char * parseHTTP(char * msg);
+		int initBrowserListener();
+		int processRequest(char * msg, int socket);
 		string parseURL(string request);
 };
 #endif /* PROXY_HPP */
