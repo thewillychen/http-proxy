@@ -23,7 +23,7 @@ Proxy::Proxy(string pport, char * cacheSizeMB){
 void* callProcessRequest(void* object){
 	threadParams * parameters = new threadParams;
 	parameters = (threadParams*)object;
-	parameters->thisProxy->processRequest(parameters->requestMsg, parameters->socket);
+	parameters->thisProxy->processRequest(parameters->requestMsg, parameters->browserSocket);
 	//delete parameters;
 	return NULL;
 }
@@ -69,7 +69,7 @@ int Proxy::initBrowserListener(){
 			//new_sock = browser 
 			threadParams params;
 			params.thisProxy = this;
-			params.socket = new_sock;
+			params.browserSocket = new_sock;
 			memset(params.requestMsg, 0, MAX_MSG_LENGTH);
 			memcpy(params.requestMsg, buf, MAX_MSG_LENGTH);
 
@@ -81,7 +81,7 @@ int Proxy::initBrowserListener(){
 	return 0;	
 }
 
-int Proxy::processRequest(char * msg, int socket){
+int Proxy::processRequest(char * msg, int browserSocket){
 	string request(msg);
 	string url = parseURL(request);
 	char reply[MAX_MSG_LENGTH*10];
@@ -117,13 +117,17 @@ int Proxy::processRequest(char * msg, int socket){
 			perror("Send error:");
 			return 1;
 		}
-		recv_len = read(sockfd,reply, MAX_MSG_LENGTH*10);
+		recv_len = read(sockfd,reply, MAX_MSG_LENGTH*100);
 		if (recv_len < 0) {
 			perror("Recv error:");
 			return 1;
 		}
-		fprintf(stderr, "Server response: %s\n", reply);
-
+		//fprintf(stderr, "Server response: %s\n", reply);
+		if(send(browserSocket, reply, recv_len, 0) <0){
+			perror("Send error");
+			return 1;
+		}
+		fprintf(stderr, "Sent reply to browser \n");
 	    break; // if we get here, we must have connected successfully
 	}
 

@@ -31,7 +31,7 @@ class Proxy{
 struct threadParams{
 	Proxy* thisProxy;
 	char requestMsg[MAX_MSG_LENGTH];
-	int socket;
+	int browserSocket;
 };
 typedef struct threadParams threadParams;
 #endif /* PROXY_HPP */
