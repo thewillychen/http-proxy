@@ -17,7 +17,7 @@ class Proxy{
 	public:
 		Proxy(string pport, char * cacheSizeMB);
 		int run();
-		int listen();
+		int listenForBrowser();
 		int respond(char * msg);
 		char * parseHTTP(char * msg);
 };
