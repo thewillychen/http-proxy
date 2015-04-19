@@ -8,6 +8,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <string.h>
+#include <regex>
 
 using namespace std;
 class Proxy{
@@ -21,5 +22,6 @@ class Proxy{
 		int listenForBrowser();
 		int respond(char * msg);
 		char * parseHTTP(char * msg);
+		char* Proxy::parseURL(char * request);
 };
 #endif /* PROXY_HPP */

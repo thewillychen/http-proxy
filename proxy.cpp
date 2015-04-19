@@ -8,6 +8,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <string.h>
+#include <regex>
 
 using namespace std;
 
@@ -61,6 +62,16 @@ int Proxy::respond(char * msg){
 	//Respond to the http request 
 	//check cahce
 	return 1;
+}
+
+char* Proxy::parseURL(char * request){
+	regex urlRegex("/^(https?:\\/\\/)?([\\da-z\\.-]+)\\.([a-z\\.]{2,6})([\\/\\w \\.-]*)*\\/?$/");
+	string http(request);
+	smatch match;
+	if (regex_search(s.begin(), s.end(), match, rgx)){
+		return match[1].c_str();
+	}
+	return NULL;
 }
 
 char * Proxy::parseHTTP(char * msg){
