@@ -6,6 +6,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
+#include <mutex> 
 using namespace std;
 
 class Node{
@@ -27,6 +28,7 @@ class LRUcache{
 	int usedMemory;
 	map<string, Node> data;
 	list<Node> queue;
+	mutex mtx;
 
 public:
 	LRUcache(int size);

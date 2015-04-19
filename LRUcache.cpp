@@ -5,6 +5,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
+#include <mutex>
 using namespace std;
 
 LRUcache::LRUcache(){
@@ -16,19 +17,26 @@ LRUcache::LRUcache(int size){
 }
 
 string LRUcache::get(string url){
+	mtx.lock();
 	if(data.count(url)){
 		Node node = data.at(url);
+		mtx.unlock();
 		moveToFirst(node);
 		return node.response;
 	}
+	mtx.unlock();
 	return NULL;
 }
 
 int LRUcache::set(string url, string response){
+	mtx.lock();
 	if(data.count(url)){ //existing element
 		Node node = data.at(url);
+		mtx.unlock();
 		moveToFirst(node);
+		mtx.lock();
 		node.response = response;
+		mtx.unlock();
 		return 1;
 	}
 
@@ -44,11 +52,14 @@ int LRUcache::set(string url, string response){
 	Node node = Node(response,url);
 	queue.push_front(node);
 	data.insert(std::pair<string, Node>(url, node));
+	mtx.unlock();
 	return 1;
 }
 
 
 void LRUcache::moveToFirst(Node node){
+	mtx.lock();
 	queue.remove(node);
 	queue.push_front(node);
+	mtx.unlock();
 }
