@@ -10,11 +10,11 @@ using namespace std;
 
 class Node{
 public:
-	string data; //data = response - http header
-	string key; //key = url
-	Node(string data, string key){
-		data = data;
-		key = key;
+	string response; //data = response - http header
+	string url; //key = url
+	Node(string newResponse, string newUrl){
+		response = newResponse;
+		url = newUrl;
 	}
 };
 
@@ -27,8 +27,8 @@ class LRUcache{
 public:
 	LRUcache(int size);
 	LRUcache();
-	string get(string key); //Returns data or NULL if not found
-	int set(string key, string data);
+	string get(string url); //Returns data or NULL if not found
+	int set(string url, string reponse);
 
 private:
 	void moveToFirst(Node node);

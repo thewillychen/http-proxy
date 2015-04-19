@@ -15,35 +15,35 @@ LRUcache::LRUcache(int size){
 	usedMemory = 0;
 }
 
-string LRUcache::get(string key){
-	if(data.count(key)){
-		Node node = data.at(key);
+string LRUcache::get(string url){
+	if(data.count(url)){
+		Node node = data.at(url);
 		moveToFirst(node);
-		return node.data;
+		return node.response;
 	}
 	return NULL;
 }
 
-int LRUcache::set(string key, string data){
-	if(data.count(key)){ //existing element
-		Node node = data.at(key);
+int LRUcache::set(string url, string response){
+	if(data.count(url)){ //existing element
+		Node node = data.at(url);
 		moveToFirst(node);
-		node.data = data;
+		node.response = response;
 		return 1;
 	}
 
 	if(data.length()< capacity){ //Out of capacity, clear oldest spots until enough space
 		while(usedMemory + data.length()>capacity){
-			string oldKey = queue.back().key;
+			string oldKey = queue.back().url;
 			queue.pop_back();
 			data.erase(oldKey);
 		}
 	}
 
 	//New entry
-	Node node = Node(data,key);
+	Node node = Node(response,url);
 	queue.push_front(node);
-	data.insert(std::pair<string, string>(key, node));
+	data.insert(std::pair<string, string>(url, node));
 	return 1;
 }
 
