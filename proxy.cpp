@@ -20,8 +20,10 @@ Proxy::Proxy(string pport, char * cacheSizeMB){
 }
 
 void* callProcessRequest(void* object){
-	threadParams parameters = (threadParams*)object;
-	parameters.thisProxy->processRequest(parameters.requestMsg, parameters.socket);
+	threadParams * parameters = new threadParams;
+	parameters = (threadParams*)object;
+	parameters->thisProxy->processRequest(parameters->requestMsg, parameters->socket);
+	//delete parameters;
 	return NULL;
 }
 
@@ -60,15 +62,15 @@ int Proxy::initBrowserListener(){
 
 		fprintf(stderr, "new connection\n");
 		if(len = ::recv(new_sock,buf,sizeof(buf),0)){ //while potentially for persistent?
-			fprintf(stderr, "receieved:\n%s\n", buf);
-			string request(buf);
-			fprintf(stderr,"Url: %s",parseURL(request).c_str());
+			// fprintf(stderr, "receieved:\n%s\n", buf);
+			// string request(buf);
+			// fprintf(stderr,"Url: %s",parseURL(request).c_str());
 			//new_sock = browser 
 			threadParams params;
 			params.thisProxy = this;
 			params.socket = new_sock;
 			memset(params.requestMsg, 0, MAX_MSG_LENGTH);
-			memset(params.requestMsg, buf, MAX_MSG_LENGTH);
+			memcpy(params.requestMsg, buf, MAX_MSG_LENGTH);
 
 			pthread_t httpRequestThread;
 			pthread_create(&httpRequestThread, NULL, &callProcessRequest,(void*)&params);

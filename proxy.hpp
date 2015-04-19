@@ -14,13 +14,6 @@
 
 using namespace std;
 
-struct threadParams{
-	Proxy thisProxy;
-	char requestMsg[MAX_MSG_LENGTH];
-	int socket;
-};
-typedef struct threadParams threadParams;
-
 class Proxy{
 	string port;
 	//int browserfd;
@@ -33,4 +26,11 @@ class Proxy{
 		int processRequest(char * msg, int socket);
 		string parseURL(string request);
 };
+
+struct threadParams{
+	Proxy* thisProxy;
+	char requestMsg[MAX_MSG_LENGTH];
+	int socket;
+};
+typedef struct threadParams threadParams;
 #endif /* PROXY_HPP */
