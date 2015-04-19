@@ -10,6 +10,7 @@
 #include <string.h>
 #include <regex>
 #include <pthread.h>
+#include <sys/socket.h>
 #define MAX_MSG_LENGTH 8190
 
 using namespace std;

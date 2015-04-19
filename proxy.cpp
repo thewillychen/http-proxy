@@ -10,6 +10,7 @@
 #include <string.h>
 #include <regex>
 #include <pthread.h>
+#include <sys/socket.h>
 
 using namespace std;
 
@@ -83,7 +84,7 @@ int Proxy::initBrowserListener(){
 int Proxy::processRequest(char * msg, int socket){
 	string request(msg);
 	string url = parseURL(request);
-	char reply[];
+	char reply[MAX_MSG_LENGTH*10];
 
 	int sockfd;  
 	struct addrinfo hints, *servinfo, *p;
@@ -94,14 +95,14 @@ int Proxy::processRequest(char * msg, int socket){
 	hints.ai_family = AF_UNSPEC; // use AF_INET6 to force IPv6
 	hints.ai_socktype = SOCK_STREAM;
 
-	if ((rv = getaddrinfo(url, "http", &hints, &servinfo)) != 0) {
+	if ((rv = getaddrinfo(url.c_str(), "http", &hints, &servinfo)) != 0) {
 		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
 		exit(1);
 	}
 
 // loop through all the results and connect to the first we can
 	for(p = servinfo; p != NULL; p = p->ai_next) {
-		if ((sockfd = socket(p->ai_family, p->ai_socktype,
+		if ((sockfd = ::socket(p->ai_family, p->ai_socktype,
 			p->ai_protocol)) == -1) {
 			perror("socket");
 		continue;
@@ -112,11 +113,11 @@ int Proxy::processRequest(char * msg, int socket){
 			continue;
 		}
 
-		if(send(socketfd,msg,MAX_MSG_LENGTH, 0)< 0){
+		if(send(sockfd,msg,MAX_MSG_LENGTH, 0)< 0){
 			perror("Send error:");
-			return l;
+			return 1;
 		}
-		recv_len = read(socketfd,reply, MAX_MSG_LENGTH*10);
+		recv_len = read(sockfd,reply, MAX_MSG_LENGTH*10);
 		if (recv_len < 0) {
 			perror("Recv error:");
 			return 1;
