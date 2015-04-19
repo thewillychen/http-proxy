@@ -32,8 +32,8 @@ int LRUcache::set(string url, string response){
 		return 1;
 	}
 
-	if(data.length()< capacity){ //Out of capacity, clear oldest spots until enough space
-		while(usedMemory + data.length()>capacity){
+	if(response.length()< capacity){ //Out of capacity, clear oldest spots until enough space
+		while(usedMemory + response.length()>capacity){
 			string oldKey = queue.back().url;
 			queue.pop_back();
 			data.erase(oldKey);
@@ -43,7 +43,7 @@ int LRUcache::set(string url, string response){
 	//New entry
 	Node node = Node(response,url);
 	queue.push_front(node);
-	data.insert(std::pair<string, string>(url, node));
+	data.insert(std::pair<string, Node>(url, node));
 	return 1;
 }
 

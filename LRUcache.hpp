@@ -16,19 +16,23 @@ public:
 		response = newResponse;
 		url = newUrl;
 	}
+
+	bool operator==( const Node& other ) const  {
+		return(response==other.response && url==other.url);
+	}
 };
 
 class LRUcache{
 	int capacity;
 	int usedMemory;
-	map<int, Node> data;
+	map<string, Node> data;
 	list<Node> queue;
 
 public:
 	LRUcache(int size);
 	LRUcache();
 	string get(string url); //Returns data or NULL if not found
-	int set(string url, string reponse);
+	int set(string url, string response);
 
 private:
 	void moveToFirst(Node node);
