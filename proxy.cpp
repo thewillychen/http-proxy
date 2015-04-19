@@ -30,7 +30,7 @@ int Proxy::listenForBrowser(){
 	char buf[8190];
 	struct sockaddr_in my_addr=sAdr(port);
 	int sock, conn_sock;
-	int len;
+	socklen_t len;
 	if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
 		perror("Create socket error:");
 		return -1;
@@ -43,7 +43,8 @@ int Proxy::listenForBrowser(){
 	printf("made socket\n");
 	listen(sock,1);
 	while(1){
-		if((conn_sock = accept(sock, (struct sockaddr *)&my_addr, &len))<0){
+		len = sizeof(my_addr);
+		if((conn_sock = ::accept(sock, (struct sockaddr *)&my_addr, &len))<0){
 			perror("Connection failed");
 			exit(1);
 		}
