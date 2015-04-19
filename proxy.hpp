@@ -22,6 +22,6 @@ class Proxy{
 		int listenForBrowser();
 		int respond(char * msg);
 		char * parseHTTP(char * msg);
-		char* Proxy::parseURL(char * request);
+		string parseURL(string request);
 };
 #endif /* PROXY_HPP */

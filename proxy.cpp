@@ -18,6 +18,15 @@ Proxy::Proxy(string pport, char * cacheSizeMB){
 	cache = LRUcache(cacheSize);
 }
 
+std::vector<std::string> & split(const std::string &s, char delim, std::vector<std::string> &elems) {
+    std::stringstream ss(s);
+    std::string item;
+    while (std::getline(ss, item, delim)) {
+        elems.push_back(item);
+    }
+    return elems;
+}
+
 int Proxy::listenForBrowser(){
 	//Do something to listen to the port and receive the http requests from the browser
 	char buf[8190];
@@ -64,14 +73,18 @@ int Proxy::respond(char * msg){
 	return 1;
 }
 
-char* Proxy::parseURL(char * request){
-	regex urlRegex("/^(https?:\\/\\/)?([\\da-z\\.-]+)\\.([a-z\\.]{2,6})([\\/\\w \\.-]*)*\\/?$/");
-	string http(request);
-	smatch match;
-	if (regex_search(s.begin(), s.end(), match, rgx)){
-		return match[1].c_str();
+string Proxy::parseURL(string request){
+	std::vector<std::string> header; 
+	header = split(request, '\r\n', header);
+	string url = NULL;
+	string host = "Host: ";
+	for(auto i : header){
+		size_t found = i.find(host);
+		if(found!=std::string::npos){
+			url = i.substring(host.length());
+		}
 	}
-	return NULL;
+	return url;
 }
 
 char * Proxy::parseHTTP(char * msg){
