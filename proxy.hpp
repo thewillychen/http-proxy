@@ -11,21 +11,25 @@
 #include <regex>
 #include <pthread.h>
 #include <sys/socket.h>
+#include <mutex>
 #define MAX_MSG_LENGTH 8190
 
 using namespace std;
+
+
 
 class Proxy{
 	string port;
 	//int browserfd;
 	int cacheSize;
 	LRUcache cache; 
-
+	static mutex cacheLock;
 	public:
 		Proxy(string pport, char * cacheSizeMB);
 		int initBrowserListener();
 		int processRequest(char * msg, int socket);
 		string parseURL(string request);
+		int getLength(string request);
 };
 
 struct threadParams{
@@ -34,4 +38,5 @@ struct threadParams{
 	int browserSocket;
 };
 typedef struct threadParams threadParams;
+
 #endif /* PROXY_HPP */

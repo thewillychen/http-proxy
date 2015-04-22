@@ -15,7 +15,7 @@ LRUcache::LRUcache(int size){
 	usedMemory = 0;
 }
 
-string LRUcache::get(string url){
+char * LRUcache::get(string url){
 	if(data.count(url)){
 		Node node = data.at(url);
 		moveToFirst(node);
@@ -24,7 +24,7 @@ string LRUcache::get(string url){
 	return NULL;
 }
 
-int LRUcache::set(string url, string response){
+int LRUcache::set(string url, char * response){
 	if(data.count(url)){ //existing element
 		Node node = data.at(url);
 		moveToFirst(node);
@@ -32,8 +32,8 @@ int LRUcache::set(string url, string response){
 		return 1;
 	}
 
-	if(response.length()< capacity){ //Out of capacity, clear oldest spots until enough space
-		while(usedMemory + response.length()>capacity){
+	if(strlen(response)< capacity){ //Out of capacity, clear oldest spots until enough space
+		while(usedMemory + strlen(response)>capacity){
 			string oldKey = queue.back().url;
 			queue.pop_back();
 			data.erase(oldKey);
