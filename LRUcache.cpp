@@ -24,6 +24,14 @@ char * LRUcache::get(string url){
 	return NULL;
 }
 
+int LRUcache::getLength(string url){
+	if(data.count(url)){
+		Node node = data.at(url);
+		//moveToFirst(node);
+		return node.length;
+	}
+	return NULL;	
+}
 int LRUcache::set(string url, char * response){
 	if(data.count(url)){ //existing element
 		Node node = data.at(url);
@@ -45,6 +53,16 @@ int LRUcache::set(string url, char * response){
 	queue.push_front(node);
 	data.insert(std::pair<string, Node>(url, node));
 	return 1;
+}
+
+int LRUcache::setLength(string url, int len){
+	if(data.count(url)){ //existing element
+		Node node = data.at(url);
+		//moveToFirst(node);
+		node.length = len;
+		return 1;
+	}
+	return 0;	
 }
 
 

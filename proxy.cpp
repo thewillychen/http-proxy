@@ -116,6 +116,21 @@ int Proxy::processRequest(char * msg, int browserSocket){
 	hints.ai_family = AF_UNSPEC; // use AF_INET6 to force IPv6
 	hints.ai_socktype = SOCK_STREAM;
 
+	string getReq = parseGetUrl(request);
+	cacheLock.lock();
+	char* cachedResponse = cache.get(getReq);
+	cacheLock.unlock();
+	if(cachedResponse!= NULL){
+		int len = cache.getLength(getReq);
+		int sl = send(browserSocket, cachedResponse, len, 0);
+		if(sl<0){
+			perror("Send error");
+			return 1;
+		}
+		close(browserSocket);
+
+		return 1;
+	}
 	if ((rv = getaddrinfo(url.c_str(), "http", &hints, &servinfo)) != 0) {
 		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
 		exit(1);
@@ -165,9 +180,10 @@ int Proxy::processRequest(char * msg, int browserSocket){
 		   fprintf(stderr, "reclen %d, reply len %d  len %d recvd %d\n", recv_len, (int)strlen(reply), length, rcvd);
 
 		}
-		// cacheLock.lock();
-		// cache.set(url, reply);
-		// cacheLock.unlock();
+		cacheLock.lock();
+		cache.set(getReq, reply);
+		cache.setLength(getReq, rcvd);
+		cacheLock.unlock();
 		fprintf(stderr, "Server response: %s\n", reply);
 		int sl = send(browserSocket, reply, rcvd, 0);
 		if(sl<0){
@@ -222,6 +238,41 @@ string Proxy::parseURL(string request){
 		size_t found = i.find(host);
 		if(found!=std::string::npos){
 			url = i.substr(host.length());
+			break;	
+		}
+	}
+	return url;
+}
+
+string parseGetURL(string request){
+	std::vector<std::string> header; 
+	string copyOfRequest = strdup(request.c_str());
+	string delimiter = "\r\n";
+	printf("Parsing url");
+	size_t pos = 0;
+	std::string token;
+	while ((pos = copyOfRequest.find(delimiter)) != std::string::npos) {
+	    token = copyOfRequest.substr(0, pos);
+	 	//fprintf(stderr, "%s\n", token.c_str());
+	    header.push_back(token);
+	    copyOfRequest.erase(0, pos + delimiter.length());
+
+	}
+
+	header.push_back(copyOfRequest);
+	string url = string();
+	string get= "GET ";
+	string ignore = "ignore_";
+	for(auto i : header){
+		size_t post = i.find("POST");
+		size_t put = i.find("PUT");
+		if(post != std::string::npos || put != std::string::npos ){
+			url = ignore;
+			break;
+		}
+		size_t found = i.find(get);
+		if(found!=std::string::npos){
+			url = i;
 			break;	
 		}
 	}

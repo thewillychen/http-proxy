@@ -12,7 +12,8 @@ using namespace std;
 class Node{
 public:
 	char * response; //data = response - http header
-	string url; //key = url
+	string url; //key = Get including url
+	int length;
 	Node(char * newResponse, string newUrl){
 		response = newResponse;
 		url = newUrl;
@@ -33,7 +34,9 @@ public:
 	LRUcache(int size);
 	LRUcache();
 	char * get(string url); //Returns data or NULL if not found
+	int getLength(string url);
 	int set(string url, char * response);
+	int setLength(string url, int len);
 
 private:
 	void moveToFirst(Node node);
